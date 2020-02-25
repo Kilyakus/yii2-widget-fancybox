@@ -8,7 +8,13 @@ use yii\helpers\Json;
 
 class Fancybox extends Widget
 {
-    public $options = [
+	public $options = [];
+
+	public $selector;
+
+	public $group = 'images';
+
+	private $presetOptions = [
         'buttons' => [ 
             "zoom",
             //"share",
@@ -17,27 +23,26 @@ class Fancybox extends Widget
             "download",
             "thumbs",
             "close"
-          ],
+        ],
     ];
-    public $selector;
 
-    public $group = 'images';
+	public function init()
+	{
+		parent::init();
 
-    public function init()
-    {
-        parent::init();
+		if (empty($this->selector)) {
+			throw new InvalidConfigException('Required `selector` param isn\'t set.');
+		}
+	}
 
-        if (empty($this->selector)) {
-            throw new InvalidConfigException('Required `selector` param isn\'t set.');
-        }
-    }
+	public function run()
+	{
+        $this->options = array_merge($this->presetOptions,$this->options);
 
-    public function run()
-    {
-        $clientOptions = (count($this->options)) ? Json::encode($this->options) : '';
+		$clientOptions = (count($this->options)) ? Json::encode($this->options) : '';
 
-        $view = $this->view;
-        $view->registerAssetBundle(FancyboxAsset::className());
-        $view->registerJs('var selector = $("'.$this->selector.'");for(var i=0;i<selector.length;i++){$(selector[i]).attr("data-fancybox","'.$this->group.'");}selector.fancybox('.$clientOptions.');',$view::POS_READY,$this->group);
-    }
+		$view = $this->view;
+		$view->registerAssetBundle(FancyboxAsset::className());
+		$view->registerJs('var selector = $("'.$this->selector.'");for(var i=0;i<selector.length;i++){$(selector[i]).attr("data-fancybox","'.$this->group.'");}selector.fancybox('.$clientOptions.');',$view::POS_READY,$this->group);
+	}
 }
